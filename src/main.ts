@@ -37,12 +37,6 @@ interface AssessmentReport {
     status: 'Ready' | 'Generating';
 }
 
-interface Question {
-    id: string;
-    text: string;
-    type: string;
-}
-
 interface Assessment {
     id: string;
     title: string;
@@ -121,8 +115,6 @@ const appView = getEl<HTMLDivElement>('app-view');
 const loginForm = getEl<HTMLFormElement>('login-form');
 const logoutBtn = getEl<HTMLButtonElement>('logout-btn');
 
-const navBtns = document.querySelectorAll('.nav-btn');
-const pages = document.querySelectorAll('.page');
 const pageTitle = getEl<HTMLHeadingElement>('page-title');
 
 const userModal = getEl<HTMLDivElement>('user-modal');
@@ -878,6 +870,7 @@ async function deleteAssessment(id: string) {
 }
 
 async function editAssessment(id: string) {
+    console.log('Editing assessment:', id);
     showToast('Editing assessment... (Loading template)', 'success');
     // For this mock, we just scroll to form and prep with ID
     switchPage('create-assessment');
