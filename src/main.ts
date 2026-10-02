@@ -1,7 +1,23 @@
-import './style.css';
+﻿import './style.css';
+const originalFetch = window.fetch;
+window.fetch = async function() {
+    let resource = arguments[0];
+    let config = arguments[1] || {};
+    
+    if (typeof resource === 'string' && resource.startsWith('http://localhost:3000')) {
+        config.headers = config.headers || {};
+        const role = sessionStorage.getItem('user_role');
+        if (role) {
+            config.headers['X-User-Role'] = role;
+        }
+    }
+    return originalFetch(resource, config);
+};
+
 
 // --- Types & Interfaces ---
 interface User {
+    
     id: string;
     name: string;
     email: string;
@@ -77,8 +93,8 @@ interface Submission {
 const initialUsers: User[] = [
     { id: 'usr_1', name: 'Alice Smith', email: 'alice@example.com', role: 'Admin', status: 'Active' },
     { id: 'usr_2', name: 'Bob Jones', email: 'bob@example.com', role: 'Reviewer', status: 'Active' },
-    { id: 'usr_3', name: 'Charlie Brown', email: 'charlie@example.com', role: 'Taker', status: 'Inactive' },
-    { id: 'usr_4', name: 'Diana Prince', email: 'diana@example.com', role: 'Taker', status: 'Active' },
+    { id: 'usr_3', name: 'Charlie Brown', email: 'charlie@example.com', role: 'student', status: 'Inactive' },
+    { id: 'usr_4', name: 'Diana Prince', email: 'diana@example.com', role: 'student', status: 'Active' },
 ];
 
 if (!localStorage.getItem('assess_users')) {
@@ -196,7 +212,7 @@ function startApp() {
     if (isAuthenticated) {
         initDashboard();
     }
-    setupEvents();
+    // setupEvents();
 }
 
 if (document.readyState === 'loading') {
@@ -230,7 +246,7 @@ function checkAuth(): void {
             educatorSidebar.classList.remove('hidden');
             studentSidebar.classList.add('hidden');
             getEl<HTMLDivElement>('educator-user-name').textContent = sessionStorage.getItem('user_name') || 'Instructor';
-        } else if (userRole === 'Taker') {
+        } else if (userRole === 'student' || userRole === 'Taker') {
             adminSidebar.classList.add('hidden');
             educatorSidebar.classList.add('hidden');
             studentSidebar.classList.remove('hidden');
@@ -257,13 +273,18 @@ loginForm.addEventListener('submit', async (e: Event) => {
     const pwdInput = getEl<HTMLInputElement>('login-password').value;
 
     try {
-        const response = await fetch('http://localhost:3000/users');
-        if (!response.ok) throw new Error('Could not fetch users');
+        const response = await fetch('http://localhost:3000/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: usernameInput, password: pwdInput })
+        });
         
-        const users = await response.json();
-        const user = users.find((u: any) => 
-            (u.username === usernameInput || u.email === usernameInput) && u.password === pwdInput
-        );
+        if (!response.ok) {
+            showToast('Invalid credentials. Please try again.', 'danger');
+            return;
+        }
+        
+        const user = await response.json();
 
         if (user) {
             isAuthenticated = true;
@@ -276,12 +297,10 @@ loginForm.addEventListener('submit', async (e: Event) => {
                 checkAuth();
                 initDashboard();
             }, 500);
-        } else {
-            showToast('Invalid credentials. Please try again.', 'error');
         }
-    } catch (error) {
-        console.error('Login error:', error);
-        showToast('Error connecting to the database.', 'error');
+    } catch (err) {
+        console.error('Login error:', err);
+        showToast('Invalid credentials. Please try again.', 'danger');
     }
 });
 
@@ -411,7 +430,11 @@ if (signupForm) {
         const name = (document.getElementById('signup-name') as HTMLInputElement).value;
         const email = (document.getElementById('signup-email') as HTMLInputElement).value;
         const password = (document.getElementById('signup-password') as HTMLInputElement).value;
-        const role = (document.getElementById('signup-role') as HTMLSelectElement).value;
+        const confirmPassword = (document.getElementById('signup-confirm-password') as HTMLInputElement).value;
+        if (password !== confirmPassword) {
+            showToast('Passwords do not match!', 'danger');
+            return;
+        }
         
         try {
             const response = await fetch('http://localhost:3000/users', {
@@ -423,18 +446,24 @@ if (signupForm) {
                     id: String(Date.now()),
                     username: name,
                     email: email,
-                    password: password,
-                    role: role
+                    password: password
                 }),
             });
 
             if (response.ok) {
-                showToast('Account stored in db.json successfully!', 'success');
+                const newUser = await response.json();
+                showToast('Registration successful!', 'success');
+                
+                // Auto-login logic
+                isAuthenticated = true;
+                sessionStorage.setItem('is_auth', 'true');
+                sessionStorage.setItem('user_role', newUser.role || 'student');
+                sessionStorage.setItem('user_name', newUser.username);
+                
                 setTimeout(() => {
-                    if(signupView) signupView.classList.add('hidden');
-                    loginView.classList.remove('hidden');
-                    (signupForm as HTMLFormElement).reset();
-                }, 1500);
+                    checkAuth();
+                    initDashboard();
+                }, 1000);
             } else {
                 showToast('Failed to save to database.', 'error');
             }
@@ -451,8 +480,8 @@ function initDashboard(): void {
     const userRole = sessionStorage.getItem('user_role');
 
     if (userRole === 'Admin') {
-        renderUserTable();
-        updateUserStats();
+        fetchAndRenderUserTable();
+        
         renderAnalytics(mockScores, mockCompletionRates, mockActivities);
         renderReports();
         
@@ -462,7 +491,7 @@ function initDashboard(): void {
         initEducatorModule();
         // Default to assessments page
         switchPage('assessments');
-    } else if (userRole === 'Taker') {
+    } else if (userRole === 'student' || userRole === 'Taker') {
         initStudentModule();
         // Default to available assessments page
         switchPage('available-assessments');
@@ -516,127 +545,110 @@ function getUsers(): User[] {
 
 function saveUsers(users: User[]): void {
     localStorage.setItem('assess_users', JSON.stringify(users));
-    renderUserTable();
-    updateUserStats();
+    fetchAndRenderUserTable();
+    
 }
 
-function renderUserTable(): void {
-    const users = getUsers();
-    usersTableBody.innerHTML = '';
-    
-    if (users.length === 0) {
-        emptyState.classList.remove('hidden');
-        dataTableContainer.classList.add('hidden');
-        return;
-    }
-    
-    emptyState.classList.add('hidden');
-    dataTableContainer.classList.remove('hidden');
-    
-    users.forEach(user => {
-        const tr = document.createElement('tr');
+async function fetchAndRenderUserTable(): Promise<void> {
+    try {
+        const response = await fetch("http://localhost:3000/users");
+        if (!response.ok) throw new Error("Failed to fetch users");
+        const users = await response.json();
         
-        const statusClass = user.status === 'Active' ? 'status-active' : 'status-inactive';
-        const initial = user.name.charAt(0).toUpperCase();
-
-        tr.innerHTML = `
-            <td>
-                <div class="user-info-cell">
-                    <div class="user-avatar">${initial}</div>
-                    <span>${user.name}</span>
-                </div>
-            </td>
-            <td>${user.email}</td>
-            <td><span class="role-badge">${user.role}</span></td>
-            <td><span class="status-badge ${statusClass}">${user.status}</span></td>
-            <td>
-                <div class="action-btns">
-                    <button class="icon-btn edit-user-btn" data-id="${user.id}" title="Edit">
-                        <i class="fa-solid fa-pen"></i>
-                    </button>
-                    <button class="icon-btn tooltip-host delete-user-btn" data-id="${user.id}" title="Delete">
-                        <i class="fa-solid fa-trash text-danger"></i>
-                    </button>
-                </div>
-            </td>
-        `;
-        usersTableBody.appendChild(tr);
-    });
-
-    // Reattach dynamic event listeners to newly generated buttons
-    document.querySelectorAll('.edit-user-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const btnEl = e.currentTarget as HTMLButtonElement;
-            editUser(btnEl.getAttribute('data-id') as string);
-        });
-    });
-
-    document.querySelectorAll('.delete-user-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const btnEl = e.currentTarget as HTMLButtonElement;
-            deleteUser(btnEl.getAttribute('data-id') as string);
-        });
-    });
-}
-
-function updateUserStats(): void {
-    const users = getUsers();
-    totalUsersStat.textContent = users.length.toString();
-    activeUsersStat.textContent = users.filter((u: User) => u.status === 'Active').length.toString();
-    adminsStat.textContent = users.filter((u: User) => u.role === 'Admin').length.toString();
-}
-
-// Modal Handlers mapped to elements instead of inline onclicks
-function setupEvents(): void {
-    btnAddUser.addEventListener('click', () => openUserModal(false));
-    btnCloseModal.addEventListener('click', () => closeUserModal());
-    btnCancelModal.addEventListener('click', () => closeUserModal());
-
-    userForm.addEventListener('submit', (e: Event) => {
-        e.preventDefault();
+        usersTableBody.innerHTML = "";
         
-        const idField = getEl<HTMLInputElement>('user-id').value;
-        const name = getEl<HTMLInputElement>('user-name').value;
-        const email = getEl<HTMLInputElement>('user-email').value;
-        const role = getEl<HTMLSelectElement>('user-role').value;
-        const status = getEl<HTMLSelectElement>('user-status').value;
-        
-        const users = getUsers();
-        
-        if (idField) {
-            // Edit Mode
-            const index = users.findIndex((u: User) => u.id === idField);
-            if (index !== -1) {
-                users[index] = { ...users[index], name, email, role, status };
-                showToast('User updated successfully', 'success');
-            }
-        } else {
-            // Add Mode
-            const newUser: User = {
-                id: 'usr_' + Date.now().toString(36),
-                name,
-                email,
-                role,
-                status
-            };
-            users.push(newUser);
-            showToast('New user added successfully', 'success');
+        if (users.length === 0) {
+            emptyState.classList.remove("hidden");
+            dataTableContainer.classList.add("hidden");
+            return;
         }
         
-        saveUsers(users);
-        closeUserModal();
-    });
-}
+        emptyState.classList.add("hidden");
+        dataTableContainer.classList.remove("hidden");
+        
+        users.forEach((user: any) => {
+            const tr = document.createElement("tr");
+            const statusClass = "status-active"; // mock
+            const initial = user.username.charAt(0).toUpperCase();
 
-function openUserModal(isEdit: boolean = false): void {
-    getEl<HTMLHeadingElement>('modal-title').textContent = isEdit ? 'Edit User' : 'Add New User';
-    userModal.classList.remove('hidden');
-}
+            tr.innerHTML = `
+                <td>
+                    <div class="user-info-cell">
+                        <div class="user-avatar">${initial}</div>
+                        <span>${user.username}</span>
+                    </div>
+                </td>
+                <td>${user.email}</td>
+                <td>
+                    <select class="role-select form-control" data-id="${user.id}" style="padding: 4px; border-radius: 4px; border: 1px solid #4f5366; background: #2f3349; color: #cfd3ec;">
+                        <option value="student" ${user.role === "student" || user.role === "Taker" ? "selected" : ""}>Student</option>
+                        <option value="Educator" ${user.role === "Educator" ? "selected" : ""}>Educator</option>
+                        <option value="Admin" ${user.role === "Admin" ? "selected" : ""}>Administrator</option>
+                    </select>
+                </td>
+                <td><span class="status-badge ${statusClass}">Active</span></td>
+                <td>
+                    <div class="action-btns">
+                        <button class="icon-btn tooltip-host delete-user-btn" data-id="${user.id}" title="Delete">
+                            <i class="fa-solid fa-trash text-danger"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            usersTableBody.appendChild(tr);
+        });
 
-function closeUserModal(): void {
-    userModal.classList.add('hidden');
-    userForm.reset();
-    getEl<HTMLInputElement>('user-id').value = '';
+        document.querySelectorAll(".role-select").forEach(select => {
+            select.addEventListener("change", async (e) => {
+                const selectEl = e.currentTarget as HTMLSelectElement;
+                const id = selectEl.getAttribute("data-id");
+                const newRole = selectEl.value;
+                try {
+                    const patchRes = await fetch(`http://localhost:3000/users/${id}`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ role: newRole })
+                    });
+                    if (patchRes.ok) {
+                        showToast("Role updated successfully!", "success");
+                    } else {
+                        showToast("Failed to update role", "danger");
+                    }
+                } catch(err) {
+                    showToast("Error updating role", "danger");
+                }
+            });
+        });
+
+        document.querySelectorAll(".delete-user-btn").forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+                if(confirm("Are you sure you want to delete this user?")) {
+                    const btnEl = e.currentTarget as HTMLButtonElement;
+                    const id = btnEl.getAttribute("data-id");
+                    try {
+                        const delRes = await fetch(`http://localhost:3000/users/${id}`, { method: "DELETE" });
+                        if(delRes.ok) {
+                            showToast("User deleted successfully!", "success");
+                            await fetchAndRenderUserTable();
+                        } else {
+                            showToast("Failed to delete user", "danger");
+                        }
+                    } catch(err) {
+                        showToast("Error deleting user", "danger");
+                    }
+                }
+            });
+        });
+
+        // Update stats
+        totalUsersStat.textContent = users.length.toString();
+        activeUsersStat.textContent = users.length.toString();
+        adminsStat.textContent = users.filter((u: any) => u.role === "Admin").length.toString();
+
+    } catch (error) {
+        console.error(error);
+        showToast("Error loading users", "danger");
+    }
 }
 
 function editUser(id: string): void {
@@ -722,7 +734,7 @@ function renderAnalytics(scores: ScoreData[], rates: CompletionRate[], activitie
                 </div>
                 <div class="activity-content">
                     <p><strong>${activity.user}</strong> ${activity.action} <em>${activity.assessment}</em></p>
-                    <small>${activity.time} ${activity.score ? '• Score: ' + activity.score + '%' : '• In Progress'}</small>
+                    <small>${activity.time} ${activity.score ? 'â€¢ Score: ' + activity.score + '%' : 'â€¢ In Progress'}</small>
                 </div>
             `;
             recentActivityList.appendChild(li);
@@ -1118,7 +1130,7 @@ async function fetchAvailableAssessments() {
         availableAssessmentsBody.innerHTML = '';
         
         // In this demo, Taker sees all assignments for "Class 10A"
-        const myAssignments = assignments.filter(a => a.group === 'Class 10A');
+        const myAssignments = assignments; // show all
         getEl<HTMLHeadingElement>('assigned-count').textContent = myAssignments.length.toString();
         getEl<HTMLHeadingElement>('due-soon-count').textContent = myAssignments.length.toString(); // Simple mock
 
@@ -1451,14 +1463,14 @@ function renderEducatorMonitor() {
             <div class="activity-icon bg-success-light text-success"><i class="fa-solid fa-check"></i></div>
             <div class="activity-content">
                 <p><strong>Maria Garcia</strong> submitted <em>Math Quiz</em></p>
-                <small>10 mins ago • Score: 88%</small>
+                <small>10 mins ago â€¢ Score: 88%</small>
             </div>
         </li>
         <li>
             <div class="activity-icon bg-warning-light text-warning"><i class="fa-solid fa-clock"></i></div>
             <div class="activity-content">
                 <p><strong>Kevin Lee</strong> started <em>Chemistry Lab</em></p>
-                <small>25 mins ago • In Progress</small>
+                <small>25 mins ago â€¢ In Progress</small>
             </div>
         </li>
     `;
@@ -1484,3 +1496,17 @@ function showToast(message: string, type: 'success' | 'error' = 'success'): void
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

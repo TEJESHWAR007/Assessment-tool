@@ -82,6 +82,34 @@
       "email": "tejesh07@gmail.com",
       "password": "1947",
       "role": "Educator"
+    },
+    {
+      "id": "7fm0BVcLemo",
+      "username": "vijay",
+      "email": "vijay07@gmail.com",
+      "password": "1234",
+      "role": "Educator"
+    },
+    {
+      "id": "voNsTFDBvjg",
+      "username": "tejesh",
+      "email": "tejesh05@gmail.com",
+      "password": "1234",
+      "role": "Taker"
+    },
+    {
+      "id": "yDI9J3kQ8Xw",
+      "username": "Hulk",
+      "email": "hulk123@gmail.com",
+      "password": "123456",
+      "role": "Taker"
+    },
+    {
+      "id": "7NVKAr7eHIY",
+      "username": "tejeshwar",
+      "email": "tejesh008@gmail.com",
+      "password": "123456",
+      "role": "Taker"
     }
   ],
   "assessments": [
@@ -154,6 +182,25 @@
             "No"
           ],
           "correct": "Yes"
+        }
+      ]
+    },
+    {
+      "id": "zqucXw6PgNo",
+      "title": "maths",
+      "category": "Math",
+      "questions": 1,
+      "timeLimit": 30,
+      "status": "Published",
+      "questionsData": [
+        {
+          "id": "q1",
+          "text": "4+1",
+          "options": [
+            "5",
+            "4"
+          ],
+          "correct": "5"
         }
       ]
     }
@@ -303,6 +350,75 @@
         {
           "questionId": "q2",
           "answer": "(No Answer)",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "id": "uEDHgAXWl0Q",
+      "assignmentId": "agn_1",
+      "userId": "usr_1776844393010",
+      "userName": "tejesh",
+      "assessmentTitle": "Mathematics Midterm",
+      "score": 50,
+      "submittedAt": "2026-04-22T07:53:13.010Z",
+      "status": "Submitted",
+      "feedback": "",
+      "answers": [
+        {
+          "questionId": "q1",
+          "answer": "12",
+          "correct": true
+        },
+        {
+          "questionId": "q2",
+          "answer": "(No Answer)",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "id": "NbxmDwSpMjY",
+      "assignmentId": "agn_1",
+      "userId": "usr_1776844471426",
+      "userName": "tejesh",
+      "assessmentTitle": "Mathematics Midterm",
+      "score": 100,
+      "submittedAt": "2026-04-22T07:54:31.426Z",
+      "status": "Submitted",
+      "feedback": "",
+      "answers": [
+        {
+          "questionId": "q1",
+          "answer": "12",
+          "correct": true
+        },
+        {
+          "questionId": "q2",
+          "answer": "13",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "id": "9zzzFbv339o",
+      "assignmentId": "agn_1",
+      "userId": "usr_1776851943028",
+      "userName": "tejesh",
+      "assessmentTitle": "Mathematics Midterm",
+      "score": 50,
+      "submittedAt": "2026-04-22T09:59:03.028Z",
+      "status": "Submitted",
+      "feedback": "",
+      "answers": [
+        {
+          "questionId": "q1",
+          "answer": "12",
+          "correct": true
+        },
+        {
+          "questionId": "q2",
+          "answer": "9",
           "correct": false
         }
       ]
