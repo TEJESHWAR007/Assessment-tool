@@ -1,10 +1,11 @@
 ﻿import './style.css';
+const API_BASE_URL = 'http://localhost:3000';
 const originalFetch = window.fetch;
 window.fetch = async function() {
     let resource = arguments[0];
     let config = arguments[1] || {};
     
-    if (typeof resource === 'string' && resource.startsWith('http://localhost:3000')) {
+    if (typeof resource === 'string' && resource.startsWith(API_BASE_URL + '')) {
         config.headers = config.headers || {};
         const role = sessionStorage.getItem('user_role');
         if (role) {
@@ -273,7 +274,7 @@ loginForm.addEventListener('submit', async (e: Event) => {
     const pwdInput = getEl<HTMLInputElement>('login-password').value;
 
     try {
-        const response = await fetch('http://localhost:3000/users/login', {
+        const response = await fetch(API_BASE_URL + '/users/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: usernameInput, password: pwdInput })
@@ -368,7 +369,7 @@ if (forgotPasswordForm) {
 
         try {
             // Find user by email
-            const response = await fetch(`http://localhost:3000/users?email=${encodeURIComponent(email)}`);
+            const response = await fetch(`${API_BASE_URL}/users?email=${encodeURIComponent(email)}`);
             const users = await response.json();
             
             if (users.length === 0) {
@@ -379,7 +380,7 @@ if (forgotPasswordForm) {
             const user = users[0];
             
             // Update password
-            const patchResponse = await fetch(`http://localhost:3000/users/${user.id}`, {
+            const patchResponse = await fetch(`${API_BASE_URL}/users/${user.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password: newPass })
@@ -437,7 +438,7 @@ if (signupForm) {
         }
         
         try {
-            const response = await fetch('http://localhost:3000/users', {
+            const response = await fetch(API_BASE_URL + '/users', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -551,7 +552,7 @@ function saveUsers(users: User[]): void {
 
 async function fetchAndRenderUserTable(): Promise<void> {
     try {
-        const response = await fetch("http://localhost:3000/users");
+        const response = await fetch(API_BASE_URL + "/users");
         if (!response.ok) throw new Error("Failed to fetch users");
         const users = await response.json();
         
@@ -604,7 +605,7 @@ async function fetchAndRenderUserTable(): Promise<void> {
                 const id = selectEl.getAttribute("data-id");
                 const newRole = selectEl.value;
                 try {
-                    const patchRes = await fetch(`http://localhost:3000/users/${id}`, {
+                    const patchRes = await fetch(`${API_BASE_URL}/users/${id}`, {
                         method: "PATCH",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ role: newRole })
@@ -626,7 +627,7 @@ async function fetchAndRenderUserTable(): Promise<void> {
                     const btnEl = e.currentTarget as HTMLButtonElement;
                     const id = btnEl.getAttribute("data-id");
                     try {
-                        const delRes = await fetch(`http://localhost:3000/users/${id}`, { method: "DELETE" });
+                        const delRes = await fetch(`${API_BASE_URL}/users/${id}`, { method: "DELETE" });
                         if(delRes.ok) {
                             showToast("User deleted successfully!", "success");
                             await fetchAndRenderUserTable();
@@ -834,7 +835,7 @@ function setupEducatorEvents() {
 
 async function fetchAndRenderAssessments() {
     try {
-        const response = await fetch('http://localhost:3000/assessments');
+        const response = await fetch(API_BASE_URL + '/assessments');
         const assessments: Assessment[] = await response.json();
         
         assessmentsTableBody.innerHTML = '';
@@ -877,7 +878,7 @@ async function fetchAndRenderAssessments() {
 async function deleteAssessment(id: string) {
     if (!confirm('Are you sure you want to delete this assessment?')) return;
     try {
-        const response = await fetch(`http://localhost:3000/assessments/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/assessments/${id}`, {
             method: 'DELETE'
         });
         if (response.ok) {
@@ -954,7 +955,7 @@ async function saveAssessment() {
     };
 
     try {
-        const response = await fetch('http://localhost:3000/assessments', {
+        const response = await fetch(API_BASE_URL + '/assessments', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newAss)
@@ -992,7 +993,7 @@ function setupReviewEvents() {
 
 async function fetchAndRenderSubmissions() {
     try {
-        const response = await fetch('http://localhost:3000/submissions');
+        const response = await fetch(API_BASE_URL + '/submissions');
         const submissions: Submission[] = await response.json();
         
         submissionsTableBody.innerHTML = '';
@@ -1036,7 +1037,7 @@ async function fetchAndRenderSubmissions() {
 
 async function openReviewDetails(id: string) {
     try {
-        const response = await fetch(`http://localhost:3000/submissions/${id}`);
+        const response = await fetch(`${API_BASE_URL}/submissions/${id}`);
         const submission: Submission = await response.json();
         
         getEl<HTMLInputElement>('submission-id').value = submission.id;
@@ -1075,7 +1076,7 @@ function closeReviewModal() {
 
 async function saveFeedback(id: string, feedback: string) {
     try {
-        const response = await fetch(`http://localhost:3000/submissions/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/submissions/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ feedback })
@@ -1121,10 +1122,10 @@ function setupStudentEvents() {
 
 async function fetchAvailableAssessments() {
     try {
-        const response = await fetch('http://localhost:3000/assignments');
+        const response = await fetch(API_BASE_URL + '/assignments');
         const assignments: Assignment[] = await response.json();
         
-        const assResp = await fetch('http://localhost:3000/assessments');
+        const assResp = await fetch(API_BASE_URL + '/assessments');
         const assessments: any[] = await assResp.json();
         
         availableAssessmentsBody.innerHTML = '';
@@ -1166,7 +1167,7 @@ async function fetchAvailableAssessments() {
 
 async function showAssessmentDetails(id: string) {
     try {
-        const response = await fetch(`http://localhost:3000/assessments/${id}`);
+        const response = await fetch(`${API_BASE_URL}/assessments/${id}`);
         const assessment = await response.json();
         
         selectedAssessmentId = id;
@@ -1185,7 +1186,7 @@ async function showAssessmentDetails(id: string) {
 async function fetchStudentResults() {
     try {
         const userName = sessionStorage.getItem('user_name');
-        const response = await fetch(`http://localhost:3000/submissions`);
+        const response = await fetch(`${API_BASE_URL}/submissions`);
         const submissions: Submission[] = await response.json();
         
         // Filter by user name for this mock
@@ -1228,7 +1229,7 @@ async function fetchStudentResults() {
 
 async function startQuiz(id: string) {
     try {
-        const response = await fetch(`http://localhost:3000/assessments/${id}`);
+        const response = await fetch(`${API_BASE_URL}/assessments/${id}`);
         const assessment = await response.json();
         
         if (!assessment.questionsData || assessment.questionsData.length === 0) {
@@ -1359,7 +1360,7 @@ async function submitQuiz() {
     };
 
     try {
-        const response = await fetch('http://localhost:3000/submissions', {
+        const response = await fetch(API_BASE_URL + '/submissions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(submission)
@@ -1397,13 +1398,13 @@ async function viewResultDetails(id: string) {
 
 async function fetchAndRenderAssignments() {
     try {
-        const response = await fetch('http://localhost:3000/assignments?_expand=assessment');
+        const response = await fetch(API_BASE_URL + '/assignments?_expand=assessment');
         // Note: json-server _expand works if you have assessmentId. 
         // But for simplicity if the relationship isn't perfect in our mock, we'll just fetch assignments.
         const assignments: Assignment[] = await response.json();
         
         // We'll also need assessments to get titles
-        const assResp = await fetch('http://localhost:3000/assessments');
+        const assResp = await fetch(API_BASE_URL + '/assessments');
         const assessments: Assessment[] = await assResp.json();
 
         assignmentsTableBody.innerHTML = '';
@@ -1496,6 +1497,7 @@ function showToast(message: string, type: 'success' | 'error' = 'success'): void
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
+
 
 
 
