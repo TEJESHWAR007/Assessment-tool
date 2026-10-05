@@ -1,5 +1,5 @@
 ﻿import './style.css';
-const API_BASE_URL = 'https://assessment-backend-production-d19f.up.railway.app';
+const API_BASE_URL = 'http://localhost:3000';
 const originalFetch = window.fetch;
 window.fetch = async function() {
     let resource = arguments[0];
