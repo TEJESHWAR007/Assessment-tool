@@ -1,5 +1,5 @@
-﻿import './style.css';
-const API_BASE_URL = 'http://localhost:3000';
+import './style.css';
+const API_BASE_URL = 'http://localhost:8080';
 const originalFetch = window.fetch;
 window.fetch = async function() {
     let resource = arguments[0];
@@ -1425,10 +1425,18 @@ async function fetchAndRenderAssignments() {
                     <div class="progress-bar-bg"><div class="progress-bar fill-primary" style="width:${progress}%"></div></div>
                 </td>
                 <td>
-                    <button class="btn btn-outline btn-sm">Manage</button>
+                    <button class="btn btn-outline btn-sm manage-agn-btn" data-id="${agn.id}">Manage</button>
                 </td>
             `;
             assignmentsTableBody.appendChild(tr);
+        });
+
+        document.querySelectorAll('.manage-agn-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = (e.currentTarget as HTMLButtonElement).getAttribute('data-id');
+                showToast('Loading assignment details...', 'success');
+                switchPage('monitor');
+            });
         });
     } catch (err) {
         console.error('Error fetching assignments:', err);
