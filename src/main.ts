@@ -1,4 +1,4 @@
-import './style.css';
+﻿import './style.css';
 const API_BASE_URL = 'https://assessment-backend-production-d19f.up.railway.app';
 const originalFetch = window.fetch;
 window.fetch = async function() {
@@ -470,7 +470,7 @@ if (signupForm) {
             }
         } catch (error) {
             console.error('Error saving user:', error);
-            showToast('Network error or server is not running.', 'error');
+            alert('DEBUG: ' + error); showToast('Network error or server is not running.', 'error');
         }
     });
 }
@@ -735,7 +735,7 @@ function renderAnalytics(scores: ScoreData[], rates: CompletionRate[], activitie
                 </div>
                 <div class="activity-content">
                     <p><strong>${activity.user}</strong> ${activity.action} <em>${activity.assessment}</em></p>
-                    <small>${activity.time} ${activity.score ? 'â€¢ Score: ' + activity.score + '%' : 'â€¢ In Progress'}</small>
+                    <small>${activity.time} ${activity.score ? 'Ã¢â‚¬Â¢ Score: ' + activity.score + '%' : 'Ã¢â‚¬Â¢ In Progress'}</small>
                 </div>
             `;
             recentActivityList.appendChild(li);
@@ -1464,14 +1464,14 @@ function renderEducatorMonitor() {
             <div class="activity-icon bg-success-light text-success"><i class="fa-solid fa-check"></i></div>
             <div class="activity-content">
                 <p><strong>Maria Garcia</strong> submitted <em>Math Quiz</em></p>
-                <small>10 mins ago â€¢ Score: 88%</small>
+                <small>10 mins ago Ã¢â‚¬Â¢ Score: 88%</small>
             </div>
         </li>
         <li>
             <div class="activity-icon bg-warning-light text-warning"><i class="fa-solid fa-clock"></i></div>
             <div class="activity-content">
                 <p><strong>Kevin Lee</strong> started <em>Chemistry Lab</em></p>
-                <small>25 mins ago â€¢ In Progress</small>
+                <small>25 mins ago Ã¢â‚¬Â¢ In Progress</small>
             </div>
         </li>
     `;
