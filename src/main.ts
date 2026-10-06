@@ -1142,7 +1142,6 @@ async function fetchAvailableAssessments() {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${ass.title}</strong></td>
-                <td><span class="role-badge">${agn.group}</span></td>
                 <td>${agn.dueDate}</td>
                 <td>${ass.timeLimit} mins</td>
                 <td>
