@@ -40,7 +40,7 @@
                 </div>
                 <div class="form-group">
                     <label for="login-password">Password</label>
-                    <input type="password" id="login-password" required autocomplete="current-password">
+                    <div class="password-wrapper"><input type="password" id="login-password" required autocomplete="current-password"><i class="fa-solid fa-eye toggle-password" data-target="login-password"></i></div>
                 </div>
                 <div class="form-actions">
                     <a href="#" id="forgot-password-link">Forgot password?</a>
@@ -97,11 +97,11 @@
                 </div>
                 <div class="form-group">
                     <label for="signup-password">Password</label>
-                    <input type="password" id="signup-password" required>
+                    <div class="password-wrapper"><input type="password" id="signup-password" required><i class="fa-solid fa-eye toggle-password" data-target="signup-password"></i></div>
                 </div>
                 <div class="form-group">
                     <label for="signup-confirm-password">Confirm Password</label>
-                    <input type="password" id="signup-confirm-password" required>
+                    <div class="password-wrapper"><input type="password" id="signup-confirm-password" required><i class="fa-solid fa-eye toggle-password" data-target="signup-confirm-password"></i></div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Create Account</button>
             </form>

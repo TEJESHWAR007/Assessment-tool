@@ -1528,3 +1528,23 @@ function showToast(message: string, type: 'success' | 'error' = 'success'): void
 
 
 
+
+// Password Toggle Logic
+document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.classList.contains('toggle-password')) {
+        const inputId = target.getAttribute('data-target');
+        if (inputId) {
+            const input = document.getElementById(inputId) as HTMLInputElement;
+            if (input.type === 'password') {
+                input.type = 'text';
+                target.classList.remove('fa-eye');
+                target.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                target.classList.remove('fa-eye-slash');
+                target.classList.add('fa-eye');
+            }
+        }
+    }
+});

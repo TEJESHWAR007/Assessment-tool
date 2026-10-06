@@ -331,3 +331,23 @@ body {
 .guideline-list li { margin-bottom: 0.75rem; }
 .mb-2 { margin-bottom: 0.5rem; }
 .mb-4 { margin-bottom: 1.5rem; }
+.password-wrapper {
+    position: relative;
+    display: block;
+}
+.password-wrapper input {
+    width: 100%;
+    padding-right: 2.5rem;
+}
+.toggle-password {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.2s;
+}
+.toggle-password:hover {
+    color: var(--text-main);
+}
