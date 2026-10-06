@@ -1,21 +1,22 @@
 {
-    "name":  "project",
-    "private":  true,
-    "version":  "0.0.0",
-    "type":  "module",
-    "scripts":  {
-                    "dev":  "vite",
-                    "dev:all":  "npm run dev",
-                    "build":  "vite build",
-                    "preview":  "vite preview",
-                    "start": "npx serve -s dist"
-                },
-    "devDependencies":  {
-                            "concurrently":  "^9.2.1",
-                            "json-server":  "^1.0.0-beta.15"
-                        },
-    "dependencies":  {
-                         "vite":  "^8.0.4",
-                         "typescript":  "~6.0.2"
-                     }
+    "name": "project",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "dev:all": "npm run dev",
+        "build": "vite build",
+        "preview": "vite preview",
+        "start": "npx -y serve -s dist -l $PORT"
+    },
+    "devDependencies": {
+        "concurrently": "^9.2.1",
+        "json-server": "^1.0.0-beta.15"
+    },
+    "dependencies": {
+        "serve": "^14.2.6",
+        "typescript": "~6.0.2",
+        "vite": "^8.0.4"
+    }
 }
