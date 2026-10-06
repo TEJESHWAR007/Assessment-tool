@@ -322,6 +322,12 @@ function performLogout(): void {
     sessionStorage.removeItem('is_auth');
     sessionStorage.removeItem('user_role');
     sessionStorage.removeItem('user_name');
+    
+    // Clear the forms so they don't persist after logging out
+    loginForm.reset();
+    const signupForm = document.getElementById('signup-form') as HTMLFormElement;
+    if (signupForm) signupForm.reset();
+    
     showToast('Logged out successfully', 'success');
     checkAuth();
 }
