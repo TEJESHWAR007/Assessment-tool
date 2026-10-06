@@ -481,6 +481,7 @@ function initDashboard(): void {
     const userRole = sessionStorage.getItem('user_role');
 
     if (userRole === 'Admin') {
+        document.title = 'Admin Dashboard';
         fetchAndRenderUserTable();
         
         renderAnalytics(mockScores, mockCompletionRates, mockActivities);
@@ -489,10 +490,12 @@ function initDashboard(): void {
         // Default to users page
         switchPage('users');
     } else if (userRole === 'Educator') {
+        document.title = 'Educator Console';
         initEducatorModule();
         // Default to assessments page
         switchPage('assessments');
     } else if (userRole === 'student' || userRole === 'Taker') {
+        document.title = 'Student Dashboard';
         initStudentModule();
         // Default to available assessments page
         switchPage('available-assessments');
