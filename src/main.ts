@@ -867,6 +867,7 @@ function renderReports(): void {
                 
                 const reportId = target.getAttribute('data-id');
                 const report = mockReports.find(r => r.id === reportId);
+                console.log('View report clicked:', reportId, report);
                 
                 if (report) {
                     if (report.type.toUpperCase() === 'CERTIFICATE') {
