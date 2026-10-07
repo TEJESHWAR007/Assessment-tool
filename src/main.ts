@@ -875,10 +875,32 @@ function renderReports(): void {
                         const certDate = document.getElementById('cert-date');
                         const certUser = document.getElementById('cert-user-name');
                         
+                        const certHtmlContent = document.getElementById('cert-html-content');
+                        const certImageContent = document.getElementById('cert-image-content');
+                        const certImage = document.getElementById('cert-image') as HTMLImageElement;
+
                         if (certModal && certName && certDate && certUser) {
-                            certName.textContent = report.name;
-                            certDate.textContent = report.date;
-                            certUser.textContent = sessionStorage.getItem('user_name') || 'Student Name';
+                            if (report.name === 'Java Bootcamp Completion' && certImageContent && certHtmlContent && certImage) {
+                                certImage.src = '/java-cert.png';
+                                certHtmlContent.style.display = 'none';
+                                certImageContent.style.display = 'block';
+                                certImageContent.classList.remove('hidden');
+                            } else if (report.name === 'React Excellence Award' && certImageContent && certHtmlContent && certImage) {
+                                certImage.src = '/react-cert.png';
+                                certHtmlContent.style.display = 'none';
+                                certImageContent.style.display = 'block';
+                                certImageContent.classList.remove('hidden');
+                            } else {
+                                if (certHtmlContent && certImageContent) {
+                                    certHtmlContent.style.display = 'block';
+                                    certImageContent.style.display = 'none';
+                                    certImageContent.classList.add('hidden');
+                                }
+                                certName.textContent = report.name;
+                                certDate.textContent = report.date;
+                                certUser.textContent = sessionStorage.getItem('user_name') || 'Student Name';
+                            }
+
                             certModal.classList.remove('hidden');
                             certModal.style.setProperty('display', 'flex', 'important');
                             certModal.style.setProperty('opacity', '1', 'important');
