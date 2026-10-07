@@ -1179,7 +1179,7 @@ async function fetchAndRenderSubmissions() {
                 <td><span class="status-badge ${sub.score >= 50 ? 'status-active' : 'status-inactive'}">${sub.score}%</span></td>
                 <td>${feedbackText}</td>
                 <td>
-                    <button class="btn btn-primary btn-sm review-btn" data-id="${sub.id}">
+                    <button type="button" class="btn btn-primary btn-sm review-btn" data-id="${sub.id}">
                         Review & Feedback
                     </button>
                 </td>
@@ -1189,7 +1189,9 @@ async function fetchAndRenderSubmissions() {
 
         document.querySelectorAll('.review-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const id = (e.currentTarget as HTMLButtonElement).getAttribute('data-id');
+                const target = (e.target as HTMLElement).closest('.review-btn') as HTMLButtonElement;
+                if (!target) return;
+                const id = target.getAttribute('data-id');
                 if (id) openReviewDetails(id);
             });
         });
@@ -1204,8 +1206,17 @@ async function openReviewDetails(id: string) {
         const submission: Submission = await response.json();
         
         getEl<HTMLInputElement>('submission-id').value = submission.id;
-        getEl<HTMLTextAreaElement>('feedback-text').value = submission.feedback || '';
         
+        const textarea = getEl<HTMLTextAreaElement>('feedback-text');
+        textarea.value = submission.feedback || '';
+        textarea.disabled = false; // Ensure it's not disabled from student view
+        
+        const form = getEl<HTMLFormElement>('feedback-form');
+        const footer = form.querySelector('.flex-end') as HTMLElement;
+        if (footer) footer.classList.remove('hidden'); // Ensure buttons are visible
+        
+        getEl<HTMLHeadingElement>('review-modal-title').textContent = 'Review Submission';
+
         const detailsContainer = getEl<HTMLDivElement>('submission-details');
         detailsContainer.innerHTML = `
             <div class="submission-detail-row">
@@ -1227,6 +1238,7 @@ async function openReviewDetails(id: string) {
         `;
         
         reviewModal.classList.remove('hidden');
+        reviewModal.style.display = 'flex';
     } catch (err) {
         showToast('Error loading submission details.', 'error');
     }
@@ -1234,6 +1246,7 @@ async function openReviewDetails(id: string) {
 
 function closeReviewModal() {
     reviewModal.classList.add('hidden');
+    reviewModal.style.display = 'none';
     feedbackForm.reset();
 }
 
