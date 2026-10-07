@@ -1620,8 +1620,7 @@ async function fetchAndRenderAssignments() {
                 </td>
                 <td>
                     <div class="action-btns" style="display: flex; gap: 5px;">
-                        <button class="btn btn-outline btn-sm manage-agn-btn" data-id="${agn.id}">Manage</button>
-                        <button class="btn btn-primary btn-sm edit-progress-btn" data-id="${agn.id}" data-completed="${agn.completed}" data-total="${agn.total}"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-outline btn-sm manage-agn-btn" data-id="${agn.id}" data-completed="${agn.completed}" data-total="${agn.total}">Manage</button>
                     </div>
                 </td>
             `;
@@ -1630,14 +1629,7 @@ async function fetchAndRenderAssignments() {
 
         document.querySelectorAll('.manage-agn-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                showToast('Loading assignment details...', 'success');
-                switchPage('monitor');
-            });
-        });
-        
-        document.querySelectorAll('.edit-progress-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const target = (e.target as HTMLElement).closest('.edit-progress-btn') as HTMLButtonElement;
+                const target = (e.currentTarget as HTMLElement).closest('.manage-agn-btn') as HTMLButtonElement;
                 if (!target) return;
                 const id = target.getAttribute('data-id') || '';
                 const completed = target.getAttribute('data-completed') || '0';
