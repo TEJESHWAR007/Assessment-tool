@@ -1215,8 +1215,10 @@ async function fetchAndRenderSubmissions() {
 
 async function openReviewDetails(id: string) {
     try {
-        const response = await fetch(`${API_BASE_URL}/submissions/${id}`);
-        const submission: Submission = await response.json();
+        const response = await fetch(`${API_BASE_URL}/submissions`);
+        const submissions: Submission[] = await response.json();
+        const submission = submissions.find(s => s.id === id);
+        if (!submission) throw new Error('Submission not found');
         
         getEl<HTMLInputElement>('submission-id').value = submission.id;
         
@@ -1253,6 +1255,7 @@ async function openReviewDetails(id: string) {
         reviewModal.classList.remove('hidden');
         reviewModal.style.display = 'flex';
     } catch (err) {
+        console.error('Error in openReviewDetails:', err);
         showToast('Error loading submission details.', 'error');
     }
 }
