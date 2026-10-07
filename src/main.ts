@@ -910,8 +910,89 @@ function setupEducatorEvents() {
         await saveAssessment();
     });
 
-    btnNewAssignment.addEventListener('click', () => {
-        showToast('Assignment interface is ready. Select an assessment to schedule.', 'success');
+    btnNewAssignment.addEventListener('click', async () => {
+        const modal = getEl<HTMLDivElement>('assign-modal');
+        const select = getEl<HTMLSelectElement>('assign-assessment-select');
+        
+        try {
+            const resp = await fetch(API_BASE_URL + '/assessments');
+            const assessments = await resp.json();
+            select.innerHTML = '<option value="">Select an assessment...</option>' + 
+                assessments.map((a: any) => `<option value="${a.id}">${a.title}</option>`).join('');
+            modal.classList.remove('hidden');
+        } catch(e) {
+            console.error('Error loading assessments', e);
+        }
+    });
+
+    getEl<HTMLButtonElement>('btn-close-assign-modal')?.addEventListener('click', () => {
+        getEl<HTMLDivElement>('assign-modal').classList.add('hidden');
+    });
+    getEl<HTMLButtonElement>('btn-cancel-assign')?.addEventListener('click', () => {
+        getEl<HTMLDivElement>('assign-modal').classList.add('hidden');
+    });
+
+    getEl<HTMLFormElement>('assign-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const assessmentId = getEl<HTMLSelectElement>('assign-assessment-select').value;
+        const group = getEl<HTMLInputElement>('assign-group').value;
+        const dueDate = getEl<HTMLInputElement>('assign-due-date').value;
+        const total = parseInt(getEl<HTMLInputElement>('assign-total').value);
+
+        if (!assessmentId || !group || !dueDate || total < 1) return;
+
+        const newAgn = {
+            id: 'agn_' + Date.now(),
+            assessmentId,
+            group,
+            dueDate,
+            completed: 0,
+            total
+        };
+
+        try {
+            await fetch(API_BASE_URL + '/assignments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newAgn)
+            });
+            getEl<HTMLDivElement>('assign-modal').classList.add('hidden');
+            (e.target as HTMLFormElement).reset();
+            showToast('Assignment created successfully!', 'success');
+            await fetchAndRenderAssignments();
+        } catch(err) {
+            console.error('Error assigning assessment', err);
+        }
+    });
+
+    // Edit Progress Modal Setup
+    getEl<HTMLButtonElement>('btn-close-progress-modal')?.addEventListener('click', () => {
+        getEl<HTMLDivElement>('edit-progress-modal').classList.add('hidden');
+    });
+    getEl<HTMLButtonElement>('btn-cancel-progress')?.addEventListener('click', () => {
+        getEl<HTMLDivElement>('edit-progress-modal').classList.add('hidden');
+    });
+
+    getEl<HTMLFormElement>('edit-progress-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = getEl<HTMLInputElement>('edit-progress-id').value;
+        const completed = parseInt(getEl<HTMLInputElement>('edit-progress-completed').value);
+        const total = parseInt(getEl<HTMLInputElement>('edit-progress-total').value);
+
+        if (completed < 0 || total < 1) return;
+
+        try {
+            await fetch(API_BASE_URL + '/assignments/' + id, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ completed, total })
+            });
+            getEl<HTMLDivElement>('edit-progress-modal').classList.add('hidden');
+            showToast('Progress updated!', 'success');
+            await fetchAndRenderAssignments();
+        } catch(err) {
+            console.error('Error updating progress', err);
+        }
     });
 }
 
@@ -1506,7 +1587,10 @@ async function fetchAndRenderAssignments() {
                     <div class="progress-bar-bg"><div class="progress-bar fill-primary" style="width:${progress}%"></div></div>
                 </td>
                 <td>
-                    <button class="btn btn-outline btn-sm manage-agn-btn" data-id="${agn.id}">Manage</button>
+                    <div class="action-btns" style="display: flex; gap: 5px;">
+                        <button class="btn btn-outline btn-sm manage-agn-btn" data-id="${agn.id}">Manage</button>
+                        <button class="btn btn-primary btn-sm edit-progress-btn" data-id="${agn.id}" data-completed="${agn.completed}" data-total="${agn.total}"><i class="fa-solid fa-pen"></i></button>
+                    </div>
                 </td>
             `;
             assignmentsTableBody.appendChild(tr);
@@ -1514,9 +1598,22 @@ async function fetchAndRenderAssignments() {
 
         document.querySelectorAll('.manage-agn-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const id = (e.currentTarget as HTMLButtonElement).getAttribute('data-id');
                 showToast('Loading assignment details...', 'success');
                 switchPage('monitor');
+            });
+        });
+        
+        document.querySelectorAll('.edit-progress-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = (e.currentTarget as HTMLButtonElement);
+                const id = target.getAttribute('data-id') || '';
+                const completed = target.getAttribute('data-completed') || '0';
+                const total = target.getAttribute('data-total') || '1';
+                
+                getEl<HTMLInputElement>('edit-progress-id').value = id;
+                getEl<HTMLInputElement>('edit-progress-completed').value = completed;
+                getEl<HTMLInputElement>('edit-progress-total').value = total;
+                getEl<HTMLDivElement>('edit-progress-modal').classList.remove('hidden');
             });
         });
     } catch (err) {
