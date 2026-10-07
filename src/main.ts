@@ -1431,6 +1431,7 @@ async function fetchStudentResults() {
                     <button class="btn btn-outline btn-sm view-feedback-btn" data-id="${sub.id}">
                         View Details
                     </button>
+                    ${sub.score >= 50 ? `<button class="btn btn-success btn-sm view-student-cert-btn" style="margin-left: 5px;" data-title="${sub.assessmentTitle}" data-date="${date}" data-user="${sub.userName}">Certificate</button>` : ''}
                 </td>
             `;
             studentResultsBody.appendChild(tr);
@@ -1440,6 +1441,52 @@ async function fetchStudentResults() {
             btn.addEventListener('click', (e) => {
                 const id = (e.currentTarget as HTMLButtonElement).getAttribute('data-id');
                 if (id) viewResultDetails(id);
+            });
+        });
+
+        document.querySelectorAll('.view-student-cert-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.currentTarget as HTMLButtonElement;
+                const title = target.getAttribute('data-title') || 'Assessment';
+                const date = target.getAttribute('data-date') || 'Date';
+                const user = target.getAttribute('data-user') || 'Student';
+
+                const certModal = document.getElementById('certificate-modal');
+                const certName = document.getElementById('cert-assessment-name');
+                const certDate = document.getElementById('cert-date');
+                const certUser = document.getElementById('cert-user-name');
+                
+                const certHtmlContent = document.getElementById('cert-html-content');
+                const certImageContent = document.getElementById('cert-image-content');
+                const certImage = document.getElementById('cert-image') as HTMLImageElement;
+
+                if (certModal && certName && certDate && certUser) {
+                    if (title === 'Java Bootcamp Completion' && certImageContent && certHtmlContent && certImage) {
+                        certImage.src = '/java-cert.png';
+                        certHtmlContent.style.display = 'none';
+                        certImageContent.style.display = 'block';
+                        certImageContent.classList.remove('hidden');
+                    } else if (title === 'React Excellence Award' && certImageContent && certHtmlContent && certImage) {
+                        certImage.src = '/react-cert.png';
+                        certHtmlContent.style.display = 'none';
+                        certImageContent.style.display = 'block';
+                        certImageContent.classList.remove('hidden');
+                    } else {
+                        if (certHtmlContent && certImageContent) {
+                            certHtmlContent.style.display = 'block';
+                            certImageContent.style.display = 'none';
+                            certImageContent.classList.add('hidden');
+                        }
+                        certName.textContent = title;
+                        certDate.textContent = date;
+                        certUser.textContent = user;
+                    }
+
+                    certModal.classList.remove('hidden');
+                    certModal.style.setProperty('display', 'flex', 'important');
+                    certModal.style.setProperty('opacity', '1', 'important');
+                    certModal.style.setProperty('visibility', 'visible', 'important');
+                }
             });
         });
     } catch (err) {
