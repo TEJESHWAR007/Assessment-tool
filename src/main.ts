@@ -223,7 +223,9 @@ function startApp() {
             const certModal = document.getElementById('certificate-modal');
             if (certModal) {
                 certModal.classList.add('hidden');
-                certModal.style.display = 'none';
+                certModal.style.removeProperty('display');
+                certModal.style.removeProperty('opacity');
+                certModal.style.removeProperty('visibility');
             }
         });
     }
@@ -859,32 +861,33 @@ function renderReports(): void {
 
         document.querySelectorAll('.view-report-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const target = (e.target as HTMLElement).closest('.view-report-btn') as HTMLButtonElement;
+                e.preventDefault();
+                const target = (e.currentTarget as HTMLElement).closest('.view-report-btn') as HTMLButtonElement;
                 if (!target) return;
                 
                 const reportId = target.getAttribute('data-id');
                 const report = mockReports.find(r => r.id === reportId);
                 
-                console.log('Clicked view report', reportId, report);
-                
                 if (report) {
-                    const certModal = document.getElementById('certificate-modal');
-                    const certName = document.getElementById('cert-assessment-name');
-                    const certDate = document.getElementById('cert-date');
-                    const certUser = document.getElementById('cert-user-name');
-                    
-                    console.log('DOM Elements found:', !!certModal, !!certName, !!certDate, !!certUser);
-                    
-                    if (certModal && certName && certDate && certUser) {
-                        certName.textContent = report.name;
-                        certDate.textContent = report.date;
-                        certUser.textContent = sessionStorage.getItem('user_name') || 'Student Name';
-                        certModal.classList.remove('hidden');
+                    if (report.type.toUpperCase() === 'CERTIFICATE') {
+                        const certModal = document.getElementById('certificate-modal');
+                        const certName = document.getElementById('cert-assessment-name');
+                        const certDate = document.getElementById('cert-date');
+                        const certUser = document.getElementById('cert-user-name');
                         
-                        // Force display flex just in case
-                        certModal.style.display = 'flex';
+                        if (certModal && certName && certDate && certUser) {
+                            certName.textContent = report.name;
+                            certDate.textContent = report.date;
+                            certUser.textContent = sessionStorage.getItem('user_name') || 'Student Name';
+                            certModal.classList.remove('hidden');
+                            certModal.style.setProperty('display', 'flex', 'important');
+                            certModal.style.setProperty('opacity', '1', 'important');
+                            certModal.style.setProperty('visibility', 'visible', 'important');
+                        } else {
+                            showToast('Certificate template not found.', 'error');
+                        }
                     } else {
-                        showToast('Opening report analytics interface...', 'success');
+                        showToast(`Opening report analytics for: ${report.name}`, 'success');
                     }
                 }
             });
