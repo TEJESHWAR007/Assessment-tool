@@ -920,16 +920,21 @@ function setupEducatorEvents() {
             select.innerHTML = '<option value="">Select an assessment...</option>' + 
                 assessments.map((a: any) => `<option value="${a.id}">${a.title}</option>`).join('');
             modal.classList.remove('hidden');
+            modal.style.display = 'flex';
         } catch(e) {
             console.error('Error loading assessments', e);
         }
     });
 
     getEl<HTMLButtonElement>('btn-close-assign-modal')?.addEventListener('click', () => {
-        getEl<HTMLDivElement>('assign-modal').classList.add('hidden');
+        const modal = getEl<HTMLDivElement>('assign-modal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
     });
     getEl<HTMLButtonElement>('btn-cancel-assign')?.addEventListener('click', () => {
-        getEl<HTMLDivElement>('assign-modal').classList.add('hidden');
+        const modal = getEl<HTMLDivElement>('assign-modal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
     });
 
     getEl<HTMLFormElement>('assign-form')?.addEventListener('submit', async (e) => {
@@ -956,7 +961,9 @@ function setupEducatorEvents() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newAgn)
             });
-            getEl<HTMLDivElement>('assign-modal').classList.add('hidden');
+            const modal = getEl<HTMLDivElement>('assign-modal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
             (e.target as HTMLFormElement).reset();
             showToast('Assignment created successfully!', 'success');
             await fetchAndRenderAssignments();
@@ -967,10 +974,14 @@ function setupEducatorEvents() {
 
     // Edit Progress Modal Setup
     getEl<HTMLButtonElement>('btn-close-progress-modal')?.addEventListener('click', () => {
-        getEl<HTMLDivElement>('edit-progress-modal').classList.add('hidden');
+        const modal = getEl<HTMLDivElement>('edit-progress-modal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
     });
     getEl<HTMLButtonElement>('btn-cancel-progress')?.addEventListener('click', () => {
-        getEl<HTMLDivElement>('edit-progress-modal').classList.add('hidden');
+        const modal = getEl<HTMLDivElement>('edit-progress-modal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
     });
 
     getEl<HTMLFormElement>('edit-progress-form')?.addEventListener('submit', async (e) => {
@@ -987,7 +998,9 @@ function setupEducatorEvents() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ completed, total })
             });
-            getEl<HTMLDivElement>('edit-progress-modal').classList.add('hidden');
+            const modal = getEl<HTMLDivElement>('edit-progress-modal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
             showToast('Progress updated!', 'success');
             await fetchAndRenderAssignments();
         } catch(err) {
@@ -1618,7 +1631,8 @@ async function fetchAndRenderAssignments() {
         
         document.querySelectorAll('.edit-progress-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const target = (e.currentTarget as HTMLButtonElement);
+                const target = (e.target as HTMLElement).closest('.edit-progress-btn') as HTMLButtonElement;
+                if (!target) return;
                 const id = target.getAttribute('data-id') || '';
                 const completed = target.getAttribute('data-completed') || '0';
                 const total = target.getAttribute('data-total') || '1';
@@ -1626,7 +1640,9 @@ async function fetchAndRenderAssignments() {
                 getEl<HTMLInputElement>('edit-progress-id').value = id;
                 getEl<HTMLInputElement>('edit-progress-completed').value = completed;
                 getEl<HTMLInputElement>('edit-progress-total').value = total;
-                getEl<HTMLDivElement>('edit-progress-modal').classList.remove('hidden');
+                const modal = getEl<HTMLDivElement>('edit-progress-modal');
+                modal.classList.remove('hidden');
+                modal.style.display = 'flex';
             });
         });
     } catch (err) {
