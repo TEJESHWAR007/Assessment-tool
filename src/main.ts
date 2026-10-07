@@ -124,7 +124,9 @@ const mockActivities: Activity[] = [
 
 let mockReports: AssessmentReport[] = [
     { id: 'rep_1', name: 'Q1 Performance Summary', date: 'Oct 12, 2026', type: 'Performance', status: 'Ready' },
-    { id: 'rep_2', name: 'Cloud Computing Drop-off Analysis', date: 'Oct 10, 2026', type: 'Completion Rate', status: 'Ready' }
+    { id: 'rep_2', name: 'Cloud Computing Drop-off Analysis', date: 'Oct 10, 2026', type: 'Completion Rate', status: 'Ready' },
+    { id: 'rep_3', name: 'Java Bootcamp Completion', date: 'Oct 15, 2026', type: 'Certificate', status: 'Ready' },
+    { id: 'rep_4', name: 'React Excellence Award', date: 'Oct 16, 2026', type: 'Certificate', status: 'Ready' }
 ];
 
 let isAuthenticated: boolean = sessionStorage.getItem('is_auth') === 'true';
@@ -213,7 +215,15 @@ function startApp() {
     if (isAuthenticated) {
         initDashboard();
     }
-    // setupEvents();
+    
+    // Global Event Listeners
+    const btnCloseCert = document.getElementById('btn-close-cert');
+    if (btnCloseCert) {
+        btnCloseCert.addEventListener('click', () => {
+            const certModal = document.getElementById('certificate-modal');
+            if (certModal) certModal.classList.add('hidden');
+        });
+    }
 }
 
 if (document.readyState === 'loading') {
@@ -596,7 +606,12 @@ async function fetchAndRenderUserTable(): Promise<void> {
                         <option value="Admin" ${user.role === "Admin" ? "selected" : ""}>Administrator</option>
                     </select>
                 </td>
-                <td><span class="status-badge ${statusClass}">Active</span></td>
+                <td>
+                    <select class="status-select form-control status-badge" data-id="${user.id}" style="padding: 4px; border-radius: 4px; border: 1px solid #4f5366; background: #2f3349; color: ${user.status === 'Inactive' ? '#ea5455' : '#28c76f'}; font-weight: bold; font-size: 0.8rem;">
+                        <option value="Active" ${user.status !== "Inactive" ? "selected" : ""} style="color: #28c76f">ACTIVE</option>
+                        <option value="Inactive" ${user.status === "Inactive" ? "selected" : ""} style="color: #ea5455">INACTIVE</option>
+                    </select>
+                </td>
                 <td>
                     <div class="action-btns">
                         <button class="icon-btn tooltip-host delete-user-btn" data-id="${user.id}" title="Delete">
@@ -626,6 +641,35 @@ async function fetchAndRenderUserTable(): Promise<void> {
                     }
                 } catch(err) {
                     showToast("Error updating role", "danger");
+                }
+            });
+        });
+
+        document.querySelectorAll(".status-select").forEach(select => {
+            select.addEventListener("change", async (e) => {
+                const selectEl = e.currentTarget as HTMLSelectElement;
+                const id = selectEl.getAttribute("data-id");
+                const newStatus = selectEl.value;
+                
+                if (newStatus === 'Inactive') {
+                    selectEl.style.color = '#ea5455';
+                } else {
+                    selectEl.style.color = '#28c76f';
+                }
+
+                try {
+                    const patchRes = await fetch(`${API_BASE_URL}/users/${id}`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ status: newStatus })
+                    });
+                    if (patchRes.ok) {
+                        showToast("Status updated successfully!", "success");
+                    } else {
+                        showToast("Failed to update status", "danger");
+                    }
+                } catch(err) {
+                    showToast("Error updating status", "danger");
                 }
             });
         });
@@ -811,9 +855,27 @@ function renderReports(): void {
         });
 
         document.querySelectorAll('.view-report-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                showToast('Opening report analytics interface...', 'success');
-                // Normally this would launch a modal or a new page to dig into the analytics insights of that report
+            btn.addEventListener('click', (e) => {
+                const target = e.currentTarget as HTMLButtonElement;
+                const reportId = target.getAttribute('data-id');
+                const report = mockReports.find(r => r.id === reportId);
+                
+                if (report) {
+                    const certModal = document.getElementById('certificate-modal');
+                    const certName = document.getElementById('cert-assessment-name');
+                    const certDate = document.getElementById('cert-date');
+                    const certUser = document.getElementById('cert-user-name');
+                    
+                    if (certModal && certName && certDate && certUser) {
+                        certName.textContent = report.name;
+                        certDate.textContent = report.date;
+                        // Use current session user or a mock student name
+                        certUser.textContent = sessionStorage.getItem('user_name') || 'Student Name';
+                        certModal.classList.remove('hidden');
+                    } else {
+                        showToast('Opening report analytics interface...', 'success');
+                    }
+                }
             });
         });
     }
