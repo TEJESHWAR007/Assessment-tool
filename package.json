@@ -7,15 +7,13 @@
         "dev": "vite",
         "dev:all": "npm run dev",
         "build": "vite build",
-        "preview": "vite preview",
-        "start": "serve -s dist"
+        "preview": "vite preview"
     },
     "devDependencies": {
         "concurrently": "^9.2.1",
         "json-server": "^1.0.0-beta.15"
     },
     "dependencies": {
-        "serve": "^14.2.6",
         "typescript": "~6.0.2",
         "vite": "^8.0.4"
     }
