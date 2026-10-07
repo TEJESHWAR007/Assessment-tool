@@ -865,53 +865,56 @@ function renderReports(): void {
                 const target = (e.currentTarget as HTMLElement).closest('.view-report-btn') as HTMLButtonElement;
                 if (!target) return;
                 
-                const reportId = target.getAttribute('data-id');
-                const report = mockReports.find(r => r.id === reportId);
-                console.log('View report clicked:', reportId, report);
-                
-                if (report) {
-                    if (report.type.toUpperCase() === 'CERTIFICATE') {
-                        const certModal = document.getElementById('certificate-modal');
-                        const certName = document.getElementById('cert-assessment-name');
-                        const certDate = document.getElementById('cert-date');
-                        const certUser = document.getElementById('cert-user-name');
-                        
-                        const certHtmlContent = document.getElementById('cert-html-content');
-                        const certImageContent = document.getElementById('cert-image-content');
-                        const certImage = document.getElementById('cert-image') as HTMLImageElement;
+                try {
+                    const reportId = target.getAttribute('data-id');
+                    const report = mockReports.find(r => r.id === reportId);
+                    
+                    if (report) {
+                        if (report.type.toUpperCase() === 'CERTIFICATE') {
+                            const certModal = document.getElementById('certificate-modal');
+                            const certName = document.getElementById('cert-assessment-name');
+                            const certDate = document.getElementById('cert-date');
+                            const certUser = document.getElementById('cert-user-name');
+                            
+                            const certHtmlContent = document.getElementById('cert-html-content');
+                            const certImageContent = document.getElementById('cert-image-content');
+                            const certImage = document.getElementById('cert-image') as HTMLImageElement;
 
-                        if (certModal && certName && certDate && certUser) {
-                            if (report.name === 'Java Bootcamp Completion' && certImageContent && certHtmlContent && certImage) {
-                                certImage.src = '/java-cert.png';
-                                certHtmlContent.style.display = 'none';
-                                certImageContent.style.display = 'block';
-                                certImageContent.classList.remove('hidden');
-                            } else if (report.name === 'React Excellence Award' && certImageContent && certHtmlContent && certImage) {
-                                certImage.src = '/react-cert.png';
-                                certHtmlContent.style.display = 'none';
-                                certImageContent.style.display = 'block';
-                                certImageContent.classList.remove('hidden');
-                            } else {
-                                if (certHtmlContent && certImageContent) {
-                                    certHtmlContent.style.display = 'block';
-                                    certImageContent.style.display = 'none';
-                                    certImageContent.classList.add('hidden');
+                            if (certModal && certName && certDate && certUser) {
+                                if (report.name === 'Java Bootcamp Completion' && certImageContent && certHtmlContent && certImage) {
+                                    certImage.src = '/java-cert.png';
+                                    certHtmlContent.style.display = 'none';
+                                    certImageContent.style.display = 'block';
+                                    certImageContent.classList.remove('hidden');
+                                } else if (report.name === 'React Excellence Award' && certImageContent && certHtmlContent && certImage) {
+                                    certImage.src = '/react-cert.png';
+                                    certHtmlContent.style.display = 'none';
+                                    certImageContent.style.display = 'block';
+                                    certImageContent.classList.remove('hidden');
+                                } else {
+                                    if (certHtmlContent && certImageContent) {
+                                        certHtmlContent.style.display = 'block';
+                                        certImageContent.style.display = 'none';
+                                        certImageContent.classList.add('hidden');
+                                    }
+                                    certName.textContent = report.name;
+                                    certDate.textContent = report.date;
+                                    certUser.textContent = sessionStorage.getItem('user_name') || 'Student Name';
                                 }
-                                certName.textContent = report.name;
-                                certDate.textContent = report.date;
-                                certUser.textContent = sessionStorage.getItem('user_name') || 'Student Name';
-                            }
 
-                            certModal.classList.remove('hidden');
-                            certModal.style.setProperty('display', 'flex', 'important');
-                            certModal.style.setProperty('opacity', '1', 'important');
-                            certModal.style.setProperty('visibility', 'visible', 'important');
+                                certModal.classList.remove('hidden');
+                                certModal.style.setProperty('display', 'flex', 'important');
+                                certModal.style.setProperty('opacity', '1', 'important');
+                                certModal.style.setProperty('visibility', 'visible', 'important');
+                            } else {
+                                showToast('Certificate template not found.', 'error');
+                            }
                         } else {
-                            showToast('Certificate template not found.', 'error');
+                            showToast(`Opening report analytics for: ${report.name}`, 'success');
                         }
-                    } else {
-                        showToast(`Opening report analytics for: ${report.name}`, 'success');
                     }
+                } catch (err: any) {
+                    alert("Error: " + err.message);
                 }
             });
         });
