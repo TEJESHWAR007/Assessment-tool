@@ -14,42 +14,134 @@
     <div id="toast-container" class="toast-container"></div>
 
     <!-- Home View -->
-    <div id="home-view" class="view-container active">
-        <div class="home-content">
-            <div class="logo-circle">
-                <i class="fa-solid fa-cube"></i>
+    <div id="home-view" class="view-container active landing-page">
+        <!-- Navigation -->
+        <nav class="landing-nav">
+            <div class="landing-logo">
+                <div class="logo-icon"><i class="fa-solid fa-cube"></i></div>
+                <span>Assessment Platform</span>
             </div>
-            <h1>Assessment Platform</h1>
-            <p>Administer courses, review metrics, and manage access in one place.</p>
-            <button id="get-started-btn" class="btn btn-primary">
-                Get Started
-            </button>
-        </div>
+            <div class="landing-links">
+                <a href="#">Features</a>
+                <a href="#">For Educators</a>
+                <a href="#">For Students</a>
+            </div>
+            <div class="landing-actions">
+                <button id="get-started-btn" class="btn btn-outline">Log in</button>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <header class="landing-hero">
+            <div class="hero-content">
+                <div class="hero-badge">Online assessments, simplified</div>
+                <h1>Assess smarter.<br>Teach with confidence.</h1>
+                <p>Create quizzes, assign them to classes, track results in real time and give meaningful feedback, all from one secure workspace.</p>
+                <div class="hero-buttons">
+                    <button id="hero-get-started-btn" class="btn btn-primary btn-lg">Get Started</button>
+                    <button class="btn btn-outline btn-lg">Sign up free</button>
+                </div>
+            </div>
+            <div class="hero-illustration">
+                <!-- A simple CSS/HTML representation of the illustration -->
+                <div class="ill-clipboard">
+                    <div class="ill-clip"></div>
+                    <div class="ill-check-circle"><i class="fa-solid fa-check"></i></div>
+                    <div class="ill-line"><i class="fa-solid fa-circle-check text-success"></i> <div class="ill-bar" style="width: 60%"></div></div>
+                    <div class="ill-line"><i class="fa-regular fa-circle text-muted"></i> <div class="ill-bar" style="width: 80%"></div></div>
+                    <div class="ill-line"><i class="fa-regular fa-circle text-muted"></i> <div class="ill-bar" style="width: 90%"></div></div>
+                    
+                    <div class="ill-stats">
+                        <div class="ill-stat-bar" style="height: 40%"></div>
+                        <div class="ill-stat-bar" style="height: 70%"></div>
+                        <div class="ill-stat-bar" style="height: 100%"></div>
+                    </div>
+                    
+                    <div class="ill-timer">
+                        <i class="fa-regular fa-clock"></i>
+                        <div class="ill-timer-bars">
+                            <div class="ill-bar short"></div>
+                            <div class="ill-bar shorter text-success-bg"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="ill-pencil"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Features Section -->
+        <section class="landing-features">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-pen"></i></div>
+                <h3>Build assessments</h3>
+                <p>Create multiple-choice quizzes with time limits, categories and answer keys in minutes.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
+                <h3>Track performance</h3>
+                <p>Monitor completion rates and scores per group with live analytics dashboards.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3>Role-based access</h3>
+                <p>Separate workspaces for admins, educators and students keep everything organised and secure.</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="landing-footer">
+            <p>&copy; 2026 Assessment Platform. All rights reserved.</p>
+        </footer>
     </div>
 
     <!-- Login View -->
-    <div id="login-view" class="view-container hidden">
-        <div class="auth-card">
-            <div class="auth-header">
-                <h2>Login</h2>
+    <div id="login-view" class="view-container split-layout hidden">
+        <div class="auth-panel hidden-mobile">
+            <div class="auth-panel-content">
+                <div class="landing-logo mb-4">
+                    <div class="logo-icon"><i class="fa-solid fa-cube"></i></div>
+                    <span>Assessment Platform</span>
+                </div>
+                
+                <h1>Welcome back. Your<br>assessments are<br>waiting.</h1>
+                
+                <ul class="benefit-list mt-4">
+                    <li><i class="fa-regular fa-circle-check text-success"></i> Create and assign quizzes in minutes</li>
+                    <li><i class="fa-regular fa-circle-check text-success"></i> Track results and give feedback</li>
+                    <li><i class="fa-regular fa-circle-check text-success"></i> Secure, role-based access</li>
+                </ul>
             </div>
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="login-username">Username</label>
-                    <input type="text" id="login-username" required autocomplete="username">
+            
+        </div>
+
+        <div class="auth-form-wrapper">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h2>Login</h2>
+                    <p class="auth-subtext">Sign in to continue to your dashboard.</p>
                 </div>
-                <div class="form-group">
-                    <label for="login-password">Password</label>
-                    <div class="password-wrapper"><input type="password" id="login-password" required autocomplete="current-password"><i class="fa-solid fa-eye toggle-password" data-target="login-password"></i></div>
-                </div>
-                <div class="form-actions">
-                    <a href="#" id="forgot-password-link">Forgot password?</a>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Login</button>
-                <div class="auth-footer">
-                    Don't have an account? <a href="#" id="sign-up-link">Sign up</a>
-                </div>
-            </form>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-username">USERNAME</label>
+                        <input type="text" id="login-username" placeholder="Enter your username" required autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">PASSWORD</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="login-password" placeholder="Enter your password" required autocomplete="current-password">
+                            <i class="fa-solid fa-eye toggle-password" data-target="login-password"></i>
+                        </div>
+                    </div>
+                    <div class="form-actions right-align">
+                        <a href="#" id="forgot-password-link">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                    <div class="auth-footer">
+                        Don't have an account? <a href="#" id="sign-up-link">Sign up</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 

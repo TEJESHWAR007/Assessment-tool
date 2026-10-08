@@ -123,8 +123,8 @@ const mockActivities: Activity[] = [
 ];
 
 let mockReports: AssessmentReport[] = [
-    { id: 'rep_1', name: 'Q1 Performance Summary', date: 'Oct 12, 2026', type: 'Performance', status: 'Ready' },
-    { id: 'rep_2', name: 'Cloud Computing Drop-off Analysis', date: 'Oct 10, 2026', type: 'Completion Rate', status: 'Ready' },
+    { id: 'rep_1', name: 'Full Stack Development', date: 'Oct 12, 2026', type: 'Certificate', status: 'Ready' },
+    { id: 'rep_2', name: 'Cloud Computing', date: 'Oct 10, 2026', type: 'Certificate', status: 'Ready' },
     { id: 'rep_3', name: 'Java Bootcamp Completion', date: 'Oct 15, 2026', type: 'Certificate', status: 'Ready' },
     { id: 'rep_4', name: 'React Excellence Award', date: 'Oct 16, 2026', type: 'Certificate', status: 'Ready' }
 ];
@@ -244,6 +244,9 @@ function checkAuth(): void {
     const signupV = document.getElementById('signup-view');
     const homeView = document.getElementById('home-view');
     const userRole = sessionStorage.getItem('user_role');
+    document.body.classList.toggle('admin-mode', userRole === 'Admin');
+    document.body.classList.toggle('educator-mode', userRole === 'Educator');
+    document.body.classList.toggle('student-mode', userRole === 'student' || userRole === 'Taker');
 
     if (isAuthenticated) {
         loginView.classList.add('hidden');
@@ -349,6 +352,11 @@ function performLogout(): void {
 
 const getStartedBtn = document.getElementById('get-started-btn');
 if (getStartedBtn) {
+    document.getElementById('hero-get-started-btn')?.addEventListener('click', () => {
+        const homeView = document.getElementById('home-view');
+        if (homeView) homeView.classList.add('hidden');
+        loginView.classList.remove('hidden');
+    });
     getStartedBtn.addEventListener('click', () => {
         const homeView = document.getElementById('home-view');
         if (homeView) homeView.classList.add('hidden');
@@ -880,27 +888,25 @@ function renderReports(): void {
                             const certImageContent = document.getElementById('cert-image-content');
                             const certImage = document.getElementById('cert-image') as HTMLImageElement;
 
+                            if (report.name === 'Java Bootcamp Completion' || report.name === 'React Excellence Award' || report.name === 'Full Stack Development' || report.name === 'Cloud Computing') {
+                                const link = document.createElement('a');
+                                link.href = report.name === 'Java Bootcamp Completion' ? '/java-cert.png' : (report.name === 'React Excellence Award' ? '/react-cert.png' : (report.name === 'Full Stack Development' ? '/full-stack-cert.png' : '/cloud-computing-cert.png'));
+                                link.download = report.name === 'Java Bootcamp Completion' ? 'java-cert.png' : (report.name === 'React Excellence Award' ? 'react-cert.png' : (report.name === 'Full Stack Development' ? 'full-stack-cert.png' : 'cloud-computing-cert.png'));
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                return;
+                            }
+
                             if (certModal && certName && certDate && certUser) {
-                                if (report.name === 'Java Bootcamp Completion' && certImageContent && certHtmlContent && certImage) {
-                                    certImage.src = '/java-cert.png';
-                                    certHtmlContent.style.display = 'none';
-                                    certImageContent.style.display = 'block';
-                                    certImageContent.classList.remove('hidden');
-                                } else if (report.name === 'React Excellence Award' && certImageContent && certHtmlContent && certImage) {
-                                    certImage.src = '/react-cert.png';
-                                    certHtmlContent.style.display = 'none';
-                                    certImageContent.style.display = 'block';
-                                    certImageContent.classList.remove('hidden');
-                                } else {
-                                    if (certHtmlContent && certImageContent) {
-                                        certHtmlContent.style.display = 'block';
-                                        certImageContent.style.display = 'none';
-                                        certImageContent.classList.add('hidden');
-                                    }
-                                    certName.textContent = report.name;
-                                    certDate.textContent = report.date;
-                                    certUser.textContent = sessionStorage.getItem('user_name') || 'Student Name';
+                                if (certHtmlContent && certImageContent) {
+                                    certHtmlContent.style.display = 'block';
+                                    certImageContent.style.display = 'none';
+                                    certImageContent.classList.add('hidden');
                                 }
+                                certName.textContent = report.name;
+                                certDate.textContent = report.date;
+                                certUser.textContent = sessionStorage.getItem('user_name') || 'Student Name';
 
                                 certModal.classList.remove('hidden');
                                 certModal.style.setProperty('display', 'flex', 'important');
@@ -985,19 +991,24 @@ function setupEducatorEvents() {
         };
 
         try {
-            await fetch(API_BASE_URL + '/assignments', {
+            const resp = await fetch(API_BASE_URL + '/assignments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newAgn)
             });
-            const modal = getEl<HTMLDivElement>('assign-modal');
-            modal.classList.add('hidden');
-            modal.style.display = 'none';
-            (e.target as HTMLFormElement).reset();
-            showToast('Assignment created successfully!', 'success');
-            await fetchAndRenderAssignments();
+            if (resp.ok) {
+                const modal = getEl<HTMLDivElement>('assign-modal');
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+                (e.target as HTMLFormElement).reset();
+                showToast('Assignment created successfully!', 'success');
+                await fetchAndRenderAssignments();
+            } else {
+                showToast('Error assigning assessment: server returned ' + resp.status, 'error');
+            }
         } catch(err) {
             console.error('Error assigning assessment', err);
+            showToast('Error assigning assessment.', 'error');
         }
     });
 
@@ -1054,6 +1065,7 @@ async function fetchAndRenderAssessments() {
                 <td><span class="status-badge ${ass.status === 'Published' ? 'status-active' : 'status-inactive'}">${ass.status}</span></td>
                 <td>
                     <div class="action-btns">
+                        <button class="icon-btn text-primary assign-ass-btn" data-id="${ass.id}" title="Assign to Students"><i class="fa-solid fa-paper-plane"></i></button>
                         <button class="icon-btn edit-ass-btn" data-id="${ass.id}"><i class="fa-solid fa-pen"></i></button>
                         <button class="icon-btn text-danger delete-ass-btn" data-id="${ass.id}"><i class="fa-solid fa-trash"></i></button>
                     </div>
@@ -1073,6 +1085,27 @@ async function fetchAndRenderAssessments() {
             btn.addEventListener('click', (e) => {
                 const id = (e.currentTarget as HTMLButtonElement).getAttribute('data-id');
                 if (id) deleteAssessment(id);
+            });
+        });
+        
+        document.querySelectorAll('.assign-ass-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = btn.getAttribute('data-id');
+                if (id) {
+                    const modal = document.getElementById('assign-modal');
+                    const select = document.getElementById('assign-assessment-select');
+                    try {
+                        const resp = await fetch('http://localhost:8080/assessments');
+                        const assessments = await resp.json();
+                        select.innerHTML = '<option value="">Select an assessment...</option>' + 
+                            assessments.map((a) => `<option value="${a.id}">${a.title}</option>`).join('');
+                        select.value = id;
+                        modal.classList.remove('hidden');
+                        modal.style.display = 'flex';
+                    } catch(err) {
+                        console.error(err);
+                    }
+                }
             });
         });
     } catch (err) {
@@ -1112,8 +1145,14 @@ function addQuestionToForm() {
         <span class="question-type-label">Multiple Choice</span>
         <input type="text" class="question-input q-text" placeholder="Enter your question here..." required>
         <div class="grid" style="grid-template-columns: 1fr 1fr; gap:0.5rem">
-            <input type="text" class="form-control" placeholder="Option A">
-            <input type="text" class="form-control" placeholder="Option B">
+            <div style="display:flex; align-items:center; gap: 0.5rem;">
+                <input type="radio" name="correct_${qId}" value="0" checked style="cursor:pointer;" title="Mark as correct">
+                <input type="text" class="form-control" placeholder="Option A" style="flex:1" required>
+            </div>
+            <div style="display:flex; align-items:center; gap: 0.5rem;">
+                <input type="radio" name="correct_${qId}" value="1" style="cursor:pointer;" title="Mark as correct">
+                <input type="text" class="form-control" placeholder="Option B" style="flex:1" required>
+            </div>
         </div>
     `;
     
@@ -1140,17 +1179,27 @@ async function saveAssessment() {
     const qData: any[] = [];
     questionCards.forEach((card, idx) => {
         const text = (card.querySelector('.q-text') as HTMLInputElement).value;
-        const options = Array.from(card.querySelectorAll('.form-control')).map(i => (i as HTMLInputElement).value);
+        const optionInputs = Array.from(card.querySelectorAll('.form-control')) as HTMLInputElement[];
+        const radioBtns = Array.from(card.querySelectorAll('input[type="radio"]')) as HTMLInputElement[];
+        
+        let correctVal = optionInputs[0] ? optionInputs[0].value : '';
+        radioBtns.forEach((radio, rIdx) => {
+            if (radio.checked && optionInputs[rIdx]) {
+                correctVal = optionInputs[rIdx].value;
+            }
+        });
+
+        const options = optionInputs.map(i => i.value).filter(o => o.trim() !== '');
+
         qData.push({
-            id: 'q' + (idx + 1),
+            id: 'q' + (idx + 1) + '-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 5),
             text: text,
-            options: options.filter(o => o.trim() !== ''),
-            correct: options[0] // Default first option as correct for this simple mock
+            options: options,
+            correct: correctVal
         });
     });
 
     const newAss: any = {
-        id: 'as_' + Date.now().toString(36),
         title,
         category,
         questions: qCount,
@@ -1172,6 +1221,8 @@ async function saveAssessment() {
             questionsList.innerHTML = '<div class="empty-state">No questions added yet.</div>';
             switchPage('assessments');
             fetchAndRenderAssessments();
+        } else {
+            showToast('Error saving assessment: server returned ' + response.status, 'error');
         }
     } catch (err) {
         showToast('Error saving assessment.', 'error');
@@ -1460,27 +1511,25 @@ async function fetchStudentResults() {
                 const certImageContent = document.getElementById('cert-image-content');
                 const certImage = document.getElementById('cert-image') as HTMLImageElement;
 
+                if (title === 'Java Bootcamp Completion' || title === 'React Excellence Award' || title === 'Full Stack Development' || title === 'Cloud Computing') {
+                    const link = document.createElement('a');
+                    link.href = title === 'Java Bootcamp Completion' ? '/java-cert.png' : (title === 'React Excellence Award' ? '/react-cert.png' : (title === 'Full Stack Development' ? '/full-stack-cert.png' : '/cloud-computing-cert.png'));
+                    link.download = title === 'Java Bootcamp Completion' ? 'java-cert.png' : (title === 'React Excellence Award' ? 'react-cert.png' : (title === 'Full Stack Development' ? 'full-stack-cert.png' : 'cloud-computing-cert.png'));
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    return;
+                }
+
                 if (certModal && certName && certDate && certUser) {
-                    if (title === 'Java Bootcamp Completion' && certImageContent && certHtmlContent && certImage) {
-                        certImage.src = '/java-cert.png';
-                        certHtmlContent.style.display = 'none';
-                        certImageContent.style.display = 'block';
-                        certImageContent.classList.remove('hidden');
-                    } else if (title === 'React Excellence Award' && certImageContent && certHtmlContent && certImage) {
-                        certImage.src = '/react-cert.png';
-                        certHtmlContent.style.display = 'none';
-                        certImageContent.style.display = 'block';
-                        certImageContent.classList.remove('hidden');
-                    } else {
-                        if (certHtmlContent && certImageContent) {
-                            certHtmlContent.style.display = 'block';
-                            certImageContent.style.display = 'none';
-                            certImageContent.classList.add('hidden');
-                        }
-                        certName.textContent = title;
-                        certDate.textContent = date;
-                        certUser.textContent = user;
+                    if (certHtmlContent && certImageContent) {
+                        certHtmlContent.style.display = 'block';
+                        certImageContent.style.display = 'none';
+                        certImageContent.classList.add('hidden');
                     }
+                    certName.textContent = title;
+                    certDate.textContent = date;
+                    certUser.textContent = user;
 
                     certModal.classList.remove('hidden');
                     certModal.style.setProperty('display', 'flex', 'important');

@@ -203,6 +203,34 @@
           "correct": "5"
         }
       ]
+    },
+    {
+      "title": "React",
+      "category": "General",
+      "questions": 2,
+      "timeLimit": 30,
+      "status": "Published",
+      "questionsData": [
+        {
+          "id": "q1",
+          "text": "What is React mainly used for?",
+          "options": [
+            "Building user interfaces",
+            "Network security"
+          ],
+          "correct": "Building user interfaces"
+        },
+        {
+          "id": "q2",
+          "text": "Which company developed React?",
+          "options": [
+            "Microsoft",
+            "Facebook (Meta)"
+          ],
+          "correct": "Microsoft"
+        }
+      ],
+      "id": "JpcMh_DS3Z8"
     }
   ],
   "assignments": [
